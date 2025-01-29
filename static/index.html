@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🌄</text></svg>"></link>
     <title>Climb It</title>
 </head>
 
 <body>
     <div class="container">
-        <h1>Login</h1>
+        <h1>Sign Up</h1>
         <form id="loginForm" action="/v1/users" method="POST">
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" required>
@@ -24,9 +25,10 @@
         </form>
     </div>
     <script>
-        // Optional: You can add JavaScript to handle form submission if needed
+        let currentUser = null;
+
         document.getElementById('loginForm').addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent the default form submission behavior
+            event.preventDefault();
 
             const nameField = document.getElementById('name');
             const emailField = document.getElementById('email');
