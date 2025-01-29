@@ -1,12 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-    
+
 <head>
     <meta charset="UTF-8">
-    <title>ClimbIt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climb It</title>
 </head>
 
 <body>
-    
+    <div class="container">
+        <h1>Login</h1>
+        <form id="loginForm" action="/v1/users" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            <br><br>
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email" required>
+            <br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br><br>
+            <button type="submit">Create User</button>
+        </form>
+    </div>
+    <script>
+        // Optional: You can add JavaScript to handle form submission if needed
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            const nameField = document.getElementById('name');
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+
+            fetch(this.action, {
+                method: this.method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: nameField.value,
+                    email: emailField.value,
+                    password: passwordField.value
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('User created successfully!');
+                    console.log(data);
+                })
+                .catch(error => {
+                    alert(`An error occurred: ${error.message}`);
+                    console.error(error);
+                });
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 300px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </body>
+
 </html>

@@ -84,6 +84,7 @@ func main() {
 	v1Router := chi.NewRouter()
 
 	if apiCfg.DB != nil {
+
 		v1Router.Post("/login", apiCfg.handlerUsersLogin)
 		v1Router.Post("/logout", apiCfg.handlerUsersLogout)
 
@@ -94,7 +95,6 @@ func main() {
 		v1Router.Delete("/habits/{habitID}", apiCfg.handlerHabitsDelete)
 
 	}
-
 	v1Router.Get("/healthzv", handlerReadiness)
 
 	router.Mount("/v1", v1Router)
