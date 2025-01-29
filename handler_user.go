@@ -127,7 +127,7 @@ func (cfg *apiConfig) handlerUsersLogout(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = cfg.DB.RevokeRefreshTokenFromUser(r.Context(), userID.String())
+	err = cfg.DB.RevokeRefreshTokenFromUser(r.Context(), userID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Couldn't revoke access token. Is the user logged in")
 		return

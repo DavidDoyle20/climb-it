@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+type Habit struct {
+	ID        string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	UserID    string
+	StartDate time.Time
+	EndDate   time.Time
+}
+
 type RefreshToken struct {
 	Token     string
 	CreatedAt time.Time

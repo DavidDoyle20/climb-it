@@ -20,7 +20,7 @@ import (
 )
 
 type apiConfig struct {
-	DB *database.Queries
+	DB        *database.Queries
 	secretKey string
 }
 
@@ -84,17 +84,23 @@ func main() {
 	v1Router := chi.NewRouter()
 
 	if apiCfg.DB != nil {
-		v1Router.Post("/users", apiCfg.handlerUsersCreate)
 		v1Router.Post("/login", apiCfg.handlerUsersLogin)
 		v1Router.Post("/logout", apiCfg.handlerUsersLogout)
+
+		v1Router.Post("/users", apiCfg.handlerUsersCreate)
+
+		v1Router.Post("/habits", apiCfg.handlerHabitsCreate)
+		v1Router.Get("/habits", apiCfg.handlerHabitsGet)
+		v1Router.Delete("/habits/{habitID}", apiCfg.handlerHabitsDelete)
+
 	}
 
-	v1Router.Get("/healthzv", handlerReadiness)	
+	v1Router.Get("/healthzv", handlerReadiness)
 
 	router.Mount("/v1", v1Router)
 	srv := &http.Server{
-		Addr: ":" + port,
-		Handler: router,
+		Addr:              ":" + port,
+		Handler:           router,
 		ReadHeaderTimeout: 30 * time.Second,
 	}
 

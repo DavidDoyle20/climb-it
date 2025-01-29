@@ -9,21 +9,21 @@ import (
 
 func MakeJWT(userID uuid.UUID, tokenSecret string) (string, error) {
 	expiresIn := time.Duration(time.Hour)
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&jwt.RegisteredClaims{
-			Issuer: "climbit", 
-			IssuedAt: jwt.NewNumericDate(time.Now().UTC()), 
+			Issuer:    "climbit",
+			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(expiresIn)),
-			Subject: userID.String(),
+			Subject:   userID.String(),
 		})
 	return token.SignedString([]byte(tokenSecret))
 }
 
-func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
+func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 	// parse the token
-	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func (token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// validate the signing method
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok { 
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
 		// return the secret key for validation
@@ -31,33 +31,33 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 	})
 
 	if err != nil {
-		return uuid.Nil, err
+		return "", err
 	}
 
 	// type assert the claims
 	claims, ok := token.Claims.(*jwt.RegisteredClaims)
 	if !ok || !token.Valid {
-		return uuid.Nil, jwt.ErrTokenInvalidClaims
+		return "", jwt.ErrTokenInvalidClaims
 	}
 
 	// validate the issuer
 	if claims.Issuer != "climbit" {
-		return uuid.Nil, jwt.ErrTokenInvalidIssuer
+		return "", jwt.ErrTokenInvalidIssuer
 	}
 
 	// validate the time based claims
 	if time.Now().After(claims.ExpiresAt.Time) {
-		return uuid.Nil, jwt.ErrTokenExpired
+		return "", jwt.ErrTokenExpired
 	}
 	if time.Now().Before(claims.IssuedAt.Time) {
-		return uuid.Nil, jwt.ErrTokenNotValidYet
+		return "", jwt.ErrTokenNotValidYet
 	}
 
 	// convert the subject back into uuid
 	userID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		return uuid.Nil, jwt.ErrTokenInvalidSubject
+		return "", jwt.ErrTokenInvalidSubject
 	}
 
-	return userID, nil
-	}
+	return userID.String(), nil
+}
