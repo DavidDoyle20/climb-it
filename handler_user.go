@@ -1,20 +1,22 @@
 package main
 
 import (
+	"climb_it/internal/auth"
 	"climb_it/internal/database"
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"log"
+	"net/http"
 	"time"
-	"climb_it/internal/auth"
+
 	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	type paramaters struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
-		Name string `json:"name"`
+		Name     string `json:"name"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	var params paramaters
@@ -25,11 +27,11 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 	}
 
 	user, err := cfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-		ID: uuid.New().String(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name: params.Name,
-		Email: params.Email,
+		ID:             uuid.New().String(),
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		Name:           params.Name,
+		Email:          params.Email,
 		HashedPassword: params.Password,
 	})
 	if err != nil {
@@ -41,17 +43,17 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 
 func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 	type response struct {
-		ID         string    `json:"id"`
-		Created_at time.Time `json:"created_at"`
-		Updated_at time.Time `json:"updated_at"`
-		Email      string    `json:"email"`
-		Name 		string `json:"name"`
-		Token      string    `json:"token"`
-		Refresh_token string `json:"refresh_token"`
+		ID            string    `json:"id"`
+		Created_at    time.Time `json:"created_at"`
+		Updated_at    time.Time `json:"updated_at"`
+		Email         string    `json:"email"`
+		Name          string    `json:"name"`
+		Token         string    `json:"token"`
+		Refresh_token string    `json:"refresh_token"`
 	}
 
 	params := parameters{}
@@ -75,7 +77,6 @@ func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-
 	token, err := auth.MakeJWT(userUUID, cfg.secretKey)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't make JWT")
@@ -90,7 +91,7 @@ func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) 
 	// Remove previous token
 	cfg.DB.RevokeRefreshTokenFromUser(r.Context(), user.ID)
 	_, err = cfg.DB.AssignRefreshTokenToUser(r.Context(), database.AssignRefreshTokenToUserParams{
-		Token: refresh_token,
+		Token:  refresh_token,
 		UserID: user.ID,
 	})
 	if err != nil {
@@ -99,14 +100,13 @@ func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	
 	userAndToken := response{
-		ID:         user.ID,
-		Created_at: user.CreatedAt,
-		Updated_at: user.UpdatedAt,
-		Email:      user.Email,
-		Name: 		user.Name,
-		Token:      token,
+		ID:            user.ID,
+		Created_at:    user.CreatedAt,
+		Updated_at:    user.UpdatedAt,
+		Email:         user.Email,
+		Name:          user.Name,
+		Token:         token,
 		Refresh_token: refresh_token,
 	}
 
@@ -114,32 +114,23 @@ func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) 
 }
 
 func (cfg *apiConfig) handlerUsersLogout(w http.ResponseWriter, r *http.Request) {
-	// check if user is logged in?
-	type parameters struct {
-		Email string `json:"email"`
-	}
-
-	var params parameters
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&params)
+	token, err := auth.GetAuthorizationHeader("Bearer", r.Header)
 	if err != nil {
-		fmt.Println(err)
-		respondWithError(w, http.StatusInternalServerError, "Failed to decode json body")
+		log.Println(err)
+		respondWithError(w, http.StatusUnauthorized, "No bearer token found in header")
 		return
 	}
 
-	user, err := cfg.DB.GetUserByEmail(r.Context(), params.Email)
+	userID, err := auth.ValidateJWT(token, cfg.secretKey)
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "Couldn't find a user with the given email")
-		return
-	}
-	
-	err = cfg.DB.RevokeRefreshTokenFromUser(r.Context(), user.ID)
-	if err != nil {
-		fmt.Println(err)
-		respondWithError(w, http.StatusNotFound, "Couldn't revoke refresh token")
+		respondWithError(w, http.StatusUnauthorized, "Couldn't validate jwt")
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, user)
+	err = cfg.DB.RevokeRefreshTokenFromUser(r.Context(), userID.String())
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Couldn't revoke access token. Is the user logged in")
+		return
+	}
+	respondWithJSON(w, http.StatusOK, nil)
 }

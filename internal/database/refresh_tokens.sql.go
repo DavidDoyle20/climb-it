@@ -13,10 +13,10 @@ const assignRefreshTokenToUser = `-- name: AssignRefreshTokenToUser :one
 INSERT INTO refresh_tokens (token, created_at, updated_at, user_id, expires_at, revoked_at)
 VALUES (
     ?,
-    time('now'),
-    time('now'),
+    datetime('now'),
+    datetime('now'),
     ?,
-    time('now', '+60 days'),
+    datetime('now', '+60 days'),
     NULL
 )
 RETURNING token, created_at, updated_at, user_id, expires_at, revoked_at
@@ -45,7 +45,7 @@ const checkAndFetchRefreshToken = `-- name: CheckAndFetchRefreshToken :one
 SELECT token, created_at, updated_at, user_id, expires_at, revoked_at
 FROM refresh_tokens
 WHERE token = ?
-    AND expires_at > time('now')
+    AND expires_at > datetime('now')
     AND revoked_at IS NULL
 `
 
@@ -86,7 +86,7 @@ func (q *Queries) GetUserFromRefreshToken(ctx context.Context, token string) (Us
 
 const revokeRefreshTokenFromUser = `-- name: RevokeRefreshTokenFromUser :exec
 UPDATE refresh_tokens
-SET revoked_at = time('now'), updated_at = time('now')
+SET revoked_at = datetime('now'), updated_at = datetime('now')
 WHERE user_id = ?
 `
 
