@@ -4,17 +4,16 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
-func MakeJWT(userID uuid.UUID, tokenSecret string) (string, error) {
+func MakeJWT(userID string, tokenSecret string) (string, error) {
 	expiresIn := time.Duration(time.Hour)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&jwt.RegisteredClaims{
 			Issuer:    "climbit",
 			IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(expiresIn)),
-			Subject:   userID.String(),
+			Subject:   userID,
 		})
 	return token.SignedString([]byte(tokenSecret))
 }
@@ -53,11 +52,5 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
 		return "", jwt.ErrTokenNotValidYet
 	}
 
-	// convert the subject back into uuid
-	userID, err := uuid.Parse(claims.Subject)
-	if err != nil {
-		return "", jwt.ErrTokenInvalidSubject
-	}
-
-	return userID.String(), nil
+	return claims.Subject, nil
 }

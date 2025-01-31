@@ -67,17 +67,12 @@ func (cfg *apiConfig) handlerUsersLogin(w http.ResponseWriter, r *http.Request) 
 
 	user, err := cfg.DB.GetUserByEmail(r.Context(), params.Email)
 	if err != nil {
+		log.Println(params.Email)
 		respondWithError(w, http.StatusNotFound, "Couldn't find a user with that email")
 		return
 	}
 
-	userUUID, err := uuid.Parse(user.ID)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't parse UUID")
-		return
-	}
-
-	token, err := auth.MakeJWT(userUUID, cfg.secretKey)
+	token, err := auth.MakeJWT(user.ID, cfg.secretKey)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't make JWT")
 		return

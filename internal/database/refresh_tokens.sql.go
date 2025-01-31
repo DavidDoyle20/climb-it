@@ -63,6 +63,29 @@ func (q *Queries) CheckAndFetchRefreshToken(ctx context.Context, token string) (
 	return i, err
 }
 
+const getRefreshTokenFromUser = `-- name: GetRefreshTokenFromUser :one
+SELECT refresh_tokens.token, refresh_tokens.created_at, refresh_tokens.updated_at, refresh_tokens.user_id, refresh_tokens.expires_at, refresh_tokens.revoked_at
+FROM refresh_tokens
+JOIN users ON refresh_tokens.user_id = users.id
+WHERE users.id = ? 
+    AND expires_at > datetime('now')
+    AND revoked_at IS NULL
+`
+
+func (q *Queries) GetRefreshTokenFromUser(ctx context.Context, id string) (RefreshToken, error) {
+	row := q.db.QueryRowContext(ctx, getRefreshTokenFromUser, id)
+	var i RefreshToken
+	err := row.Scan(
+		&i.Token,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.ExpiresAt,
+		&i.RevokedAt,
+	)
+	return i, err
+}
+
 const getUserFromRefreshToken = `-- name: GetUserFromRefreshToken :one
 SELECT users.id, users.created_at, users.updated_at, users.name, users.email, users.hashed_password
 FROM refresh_tokens

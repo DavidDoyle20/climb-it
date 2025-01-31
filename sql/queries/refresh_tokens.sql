@@ -28,3 +28,11 @@ WHERE token = ?
     AND expires_at > datetime('now')
     AND revoked_at IS NULL;
 
+-- name: GetRefreshTokenFromUser :one
+SELECT refresh_tokens.*
+FROM refresh_tokens
+JOIN users ON refresh_tokens.user_id = users.id
+WHERE users.id = ? 
+    AND expires_at > datetime('now')
+    AND revoked_at IS NULL;
+

@@ -4,54 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🌄</text></svg>"></link>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🌄</text></svg>">
+    </link>
     <title>Climb It</title>
 </head>
 
 <body>
     <div class="container">
-        <h1>Sign Up</h1>
-        <form id="loginForm" action="/v1/users" method="POST">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-            <br><br>
+        <h1>Login</h1>
+        <form id="loginForm">
             <label for="email">Email:</label>
             <input type="text" id="email" name="email" required>
             <br><br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
             <br><br>
-            <button type="submit">Create User</button>
+            <button type="submit">Login</button>
         </form>
     </div>
-    <script>
-        let currentUser = null;
+    <script type="module">
+        let JWT = null;
 
-        document.getElementById('loginForm').addEventListener('submit', function (event) {
-            event.preventDefault();
+        const url = "http://localhost:8080/v1/login"
 
-            const nameField = document.getElementById('name');
-            const emailField = document.getElementById('email');
-            const passwordField = document.getElementById('password');
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
 
-            fetch(this.action, {
-                method: this.method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: nameField.value,
-                    email: emailField.value,
-                    password: passwordField.value
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert('User created successfully!');
-                    console.log(data);
-                })
-                .catch(error => {
-                    alert(`An error occurred: ${error.message}`);
-                    console.error(error);
+        async function loginAndSetToken() {
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email: emailField.value, password: passwordField.value })
                 });
+
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+
+                const data = await response.json();
+                console.log(data.token)
+                setJWT(data.token);
+            } catch (error) {
+                console.error('Error logging in:', error);
+                throw error;
+            }
+        }
+
+        function setJWT(token) {
+            JWT = token;
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            await loginAndSetToken();
         });
     </script>
     <style>
