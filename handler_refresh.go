@@ -8,7 +8,7 @@ import (
 
 func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {
 	type resp struct {
-		Token string `json:token`
+		Token string `json:"token"`
 	}
 	// gets bearer token "jwt" from header
 	token, err := auth.GetAuthorizationHeader("Bearer", r.Header)

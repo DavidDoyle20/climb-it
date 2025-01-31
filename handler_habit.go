@@ -14,7 +14,7 @@ import (
 
 func (cfg *apiConfig) handlerHabitsCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Name       string    `json"name"`
+		Name       string    `json:"name"`
 		Start_Date time.Time `json:"start_date"`
 		End_Date   time.Time `json:"end_date"`
 	}
