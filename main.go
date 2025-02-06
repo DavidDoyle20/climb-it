@@ -87,7 +87,7 @@ func main() {
 
 		v1Router.Post("/login", apiCfg.handlerUsersLogin)
 		v1Router.Post("/logout", apiCfg.handlerUsersLogout)
-		v1Router.Post("/refresh", apiCfg.handlerRefresh)
+		v1Router.Post("/refresh-token", apiCfg.handlerRefresh)
 
 		v1Router.Post("/users", apiCfg.handlerUsersCreate)
 

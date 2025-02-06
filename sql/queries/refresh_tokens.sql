@@ -11,8 +11,7 @@ VALUES (
 RETURNING *;
 
 -- name: RevokeRefreshTokenFromUser :exec
-UPDATE refresh_tokens
-SET revoked_at = datetime('now'), updated_at = datetime('now')
+DELETE FROM refresh_tokens
 WHERE user_id = ?;
 
 -- name: GetUserFromRefreshToken :one

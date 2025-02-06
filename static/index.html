@@ -24,44 +24,55 @@
         </form>
     </div>
     <script type="module">
-        let JWT = null;
-
-        const url = "http://localhost:8080/v1/login"
-
+        const url = "http://localhost:8080/v1";
+        let accessToken = "";
         const emailField = document.getElementById('email');
         const passwordField = document.getElementById('password');
 
-        async function loginAndSetToken() {
+        async function handleLoginResponse(response) {
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Login failed');
+            }
+
+            // Successful login - redirect to protected page
+            //window.location.href = url + "/habits";
+            let resp = await fetch(url + "/habits", {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "Authorization":
+                        `Bearer ${accessToken}`
+                }
+            });
+        }
+
+        async function loginAndSetToken(event) {
+            event.preventDefault();
+
             try {
-                const response = await fetch(url, {
+                const response = await fetch(url + "/login", {
                     method: "POST",
+                    credentials: 'include',
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ email: emailField.value, password: passwordField.value })
+                    body: JSON.stringify({
+                        email: emailField.value,
+                        password: passwordField.value
+                    })
                 });
-
-                if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                }
-
                 const data = await response.json();
-                console.log(data.token)
-                setJWT(data.token);
+                console.log(data);
+                accessToken = data.token;
+                await handleLoginResponse(response);
             } catch (error) {
-                console.error('Error logging in:', error);
-                throw error;
+                console.error('Login error:', error);
+                alert(`Login failed: ${error.message}`);
             }
         }
 
-        function setJWT(token) {
-            JWT = token;
-        }
-
-        document.getElementById('loginForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            await loginAndSetToken();
-        });
+        document.getElementById('loginForm').addEventListener('submit', loginAndSetToken);
     </script>
     <style>
         body {
