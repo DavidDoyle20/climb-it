@@ -3,7 +3,7 @@
 ## Description
 
 - The goal of the application is to apply progressive overload principles from sports science into habits
-- This app doesn't stop at just building the habit but pushed you to build your capacity for doing specific habits
+- This app doesn't stop at just building the habit but pushes you to build your capacity for doing specific habits
 - This app will also generate progressions for you based on your stystemic stress and recovery calculated through questions on current mental state and body feel
 - If your goal is to learn a new language the app may start you at only doing 15 mins every other day, but over months you may be doing 2-3 hours a day of language learning given you have the time.
 
