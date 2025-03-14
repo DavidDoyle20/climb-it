@@ -19,3 +19,5 @@
 ## TODO
 
 - Add a front end (currently learning react)
+
+## Contributing
